@@ -11,7 +11,7 @@ si es buen momento de compra. Viven en `.claude/agents/` y se invocan con el Age
 | 2 | `analista-crecimiento` | Vidente    | Variacion futura, **PEG** y **P/E** (trailing) |
 | 3 | `analista-valoracion`  | Oraculo    | **Forward P/E** + sintetiza a los colegas → **decision de compra** |
 | 4 | `analista-catalizadores`| Vigia     | Noticias y eventos proximos que muevan el precio |
-| 5 | `analista-algoritmico` | Quant      | Lee los indicadores algoritmicos (RSI multihorario) — *pendiente del algoritmo* |
+| 5 | `analista-algoritmico` | Quant      | Lee la senal del motor `algo/` (RSI multihorario) desde `signals/signals.json` |
 
 ## Flujo de orquestacion
 
@@ -19,12 +19,11 @@ si es buen momento de compra. Viven en `.claude/agents/` y se invocan con el Age
         ┌─ Centinela (entrada) ─┐
 ticker ─┼─ Vidente  (crecimiento)┼──► Oraculo (forward P/E + sintesis) ──► DECISION
         ├─ Vigia    (catalizadores)
-        └─ Quant    (algoritmo) ─┘   (PENDIENTE hasta crear el algoritmo)
+        └─ Quant    (algoritmo) ─┘   (lee signals/signals.json del motor algo/)
 ```
 
 - **Centinela, Vidente, Vigia y Quant** se pueden correr en paralelo (son independientes).
 - **Oraculo** depende de los cuatro: consume sus veredictos y emite la decision final ponderada.
-- **Quant** devolvera "PENDIENTE" hasta que construyamos el motor de RSI multihorario.
 
 ## Contrato de salida
 
@@ -41,7 +40,12 @@ NVDA, AVGO, AMD, QCOM, TXN, INTC, MU, AMAT, LRCX, KLAC, ADI,
 MCHP, MRVL, MPWR, TER, ON, ENTG, SWKS, COHR, NXPI, QRVO, ALAB
 ```
 
-## Pendiente
+## Motor de senales (listo)
 
-- Construir el algoritmo de **RSI multihorario** cuya salida leera `Quant`
-  (rutas esperadas: `indicators/`, `signals/`, `output/` en JSON/CSV).
+El algoritmo de **RSI multihorario** ya existe en `algo/` y alimenta a `Quant`:
+
+```bash
+PYTHONPATH=. python3 -m algo.run --universe   # genera signals/signals.json
+```
+
+RSI semanal (sesgo) + RSI 4h (timing) + direccion EMA/VWAP. Detalles en el README raiz.
